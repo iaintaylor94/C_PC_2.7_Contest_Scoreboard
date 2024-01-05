@@ -35,6 +35,7 @@ struct team {
 struct teams {
   struct team teams[gMaxNumTeams];
 };
+struct team gScoreboard[gMaxNumTeams];
 
 // Declare Functions
 // File Handling
@@ -52,6 +53,11 @@ void printSubmission (struct input);
 // Teams
 struct teams zeroTeams(void);
 void printTeam(struct team);
+
+// Scoreboard
+void zeroScoreboard(struct team [gMaxNumTeams]);
+void calculateScoreboard(struct team [gMaxNumTeams]);
+void printScoreboard(struct team [gMaxNumTeams]);
 
 int main(int argc, char *argv[]) {
 
@@ -83,14 +89,14 @@ int main(int argc, char *argv[]) {
 //      printSubmission(submission); printf ("\n");
 
       processSubmission (submission, teams);
-//      printTeam (teams.teams[submission.teamNum - 1]);
+//      printTeam (teams.teams[submission.teamNum - 1]); // ??? working ??? - test via output
 
-
-      
       submission = getSubmission(gInputFile);
     }
 
-
+    zeroScoreboard(gScoreboard);
+//    calculateScoreboard(gScoreboard);
+//    printScoreboard(gScoreboard);
     
     teams = zeroTeams();
   }
@@ -189,17 +195,21 @@ void printSubmission (struct input submission) {
 }
 
 // Teams
-struct teams zeroTeams(void) {
-  struct teams retTeams;
+struct team zeroTeam (int teamID) {
   struct team zero;
+  zero.teamID = teamID;
   for (int i = 0; i < gNumProblems; i++) {
     zero.problems[i].num = 0;
     zero.problems[i].solved = false;
     zero.problems[i].timePenalty = 0;
   }
+  return zero;
+}
+struct teams zeroTeams(void) {
+  struct teams retTeams;
+
   for (int i = 0; i < gMaxNumTeams; i++) {
-    retTeams.teams[i] = zero;
-    retTeams.teams[i].teamID = i + 1;
+    retTeams.teams[i] = zeroTeam(i + 1);
   }
   return retTeams;
 }
@@ -210,4 +220,10 @@ void printTeam(struct team t) {
     printf ("solved = %d\n", t.problems[i].solved);
     printf ("timePenalty = %d\n", t.problems[i].timePenalty);
   }  
+}
+
+void zeroScoreboard(struct team scoreboard[gMaxNumTeams]) {
+  for (int i = 0; i < gMaxNumTeams; i++) {
+    scoreboard[i] = zeroTeam(i);
+  }
 }
