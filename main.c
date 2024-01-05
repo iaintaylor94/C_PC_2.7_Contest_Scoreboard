@@ -35,7 +35,7 @@ struct team {
 struct teams {
   struct team teams[gMaxNumTeams];
 };
-struct team gScoreboard[gMaxNumTeams];
+struct teams gScoreboard;
 
 // Declare Functions
 // File Handling
@@ -55,9 +55,10 @@ struct teams zeroTeams(void);
 void printTeam(struct team);
 
 // Scoreboard
-void zeroScoreboard(struct team [gMaxNumTeams]);
-void calculateScoreboard(struct team [gMaxNumTeams]);
-void printScoreboard(struct team [gMaxNumTeams]);
+bool isCompeting (struct team);
+void zeroScoreboard(struct teams);
+void calculateScoreboard(struct teams);
+void printScoreboard(struct teams);
 
 int main(int argc, char *argv[]) {
 
@@ -96,7 +97,7 @@ int main(int argc, char *argv[]) {
 
     zeroScoreboard(gScoreboard);
 //    calculateScoreboard(gScoreboard);
-//    printScoreboard(gScoreboard);
+    printScoreboard(gScoreboard);
     
     teams = zeroTeams();
   }
@@ -222,8 +223,24 @@ void printTeam(struct team t) {
   }  
 }
 
-void zeroScoreboard(struct team scoreboard[gMaxNumTeams]) {
+void zeroScoreboard(struct teams scoreboard) {
   for (int i = 0; i < gMaxNumTeams; i++) {
-    scoreboard[i] = zeroTeam(i);
+    scoreboard.teams[i] = zeroTeam(i);
   }
+}
+bool isCompeting (struct team competing) {
+  for (int i = 0; i < gNumProblems; i++) {
+    if (competing.problems[i].solved) {
+      return true;
+    }
+  }
+  return false;
+}
+void printScoreboard(struct teams t) {
+  for (int i = 0; i < gMaxNumTeams; i++) {
+    if (isCompeting(t.teams[i])) {
+    printTeam(t.teams[i]);
+    }
+  }
+  printf ("\n");
 }
