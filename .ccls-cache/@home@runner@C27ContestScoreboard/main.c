@@ -10,6 +10,8 @@ FILE *gInputFile;
 
 // Constants
 const int gMaxLineLength = 81;
+const int gMaxNumTeams = 100;
+const int gNumProblems = 9;
 
 // Structures
 struct input {
@@ -19,6 +21,18 @@ struct input {
   char submission; // C I R U E
 
   bool is_valid;
+};
+struct problem {
+  int num;
+  bool solved;
+  int timePenalty;
+};
+struct team {
+  int teamID;
+  struct problem problems[gNumProblems];
+};
+struct teams {
+  struct team teams[gMaxNumTeams];
 };
 
 // Declare Functions
@@ -31,6 +45,9 @@ void stripBlankLine(FILE*);
 struct input getSubmission(FILE*);
 
 void printSubmission (struct input);
+
+// Teams
+struct teams zeroTeams(void);
 
 int main(int argc, char *argv[]) {
 
@@ -47,17 +64,28 @@ int main(int argc, char *argv[]) {
   /*-------------------------------FILE INITIALIZATION END--------------------------------*/
   /*--------------------------------MAIN PROGRAM START------------------------------------*/
 
+  // Define teams
+  struct teams teams = zeroTeams();
+
+  
   // Get input
   int numCases = getNumCases(gInputFile);
   printf ("numCases = %d\n", numCases);
   stripBlankLine(gInputFile);
 
-  for (int i = 0; i < numCases; i++) {
+  for (int i = 0; i < numCases; i++) { 
     struct input submission = getSubmission(gInputFile);
     while (submission.is_valid) {
       printSubmission(submission); printf ("\n");
+
+
+
+
+
+      
       submission = getSubmission(gInputFile);
     }
+    teams = zeroTeams();
   }
 
   
@@ -118,4 +146,19 @@ void printSubmission (struct input submission) {
   printf ("time_minutes = %d\n", submission.time_minutes);
   printf ("submission = %c\n", submission.submission);
   printf ("is_valid = %d\n", submission.is_valid);
+}
+
+// Teams
+struct teams zeroTeams(void) {
+  struct teams retTeams;
+  struct team zero;
+  for (int i = 0; i < gNumProblems; i++) {
+    zero.problems[i].num = 0;
+    zero.problems[i].solved = false;
+    zero.problems[i].timePenalty = 0;
+  }
+  for (int i = 0; i < gMaxNumTeams; i++) {
+    retTeams.teams[i] = zero;
+  }
+  return retTeams;
 }
