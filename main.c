@@ -12,6 +12,7 @@ FILE *gInputFile;
 const int gMaxLineLength = 81;
 const int gMaxNumTeams = 100;
 const int gNumProblems = 9;
+const int gTimePenalty = 20;
 
 // Structures
 struct input {
@@ -44,10 +45,13 @@ int getNumCases (FILE*);
 void stripBlankLine(FILE*);
 struct input getSubmission(FILE*);
 
+void processSubmission (struct input, struct teams);
+
 void printSubmission (struct input);
 
 // Teams
 struct teams zeroTeams(void);
+void printTeam(struct team);
 
 int main(int argc, char *argv[]) {
 
@@ -76,15 +80,18 @@ int main(int argc, char *argv[]) {
   for (int i = 0; i < numCases; i++) { 
     struct input submission = getSubmission(gInputFile);
     while (submission.is_valid) {
-      printSubmission(submission); printf ("\n");
+//      printSubmission(submission); printf ("\n");
 
-
-
+      processSubmission (submission, teams);
+//      printTeam (teams.teams[submission.teamNum - 1]);
 
 
       
       submission = getSubmission(gInputFile);
     }
+
+
+    
     teams = zeroTeams();
   }
 
@@ -140,6 +147,39 @@ struct input getSubmission(FILE* fp) {
   return retSubmission;
 }
 
+
+void processCorrect (struct input in, struct teams to) {
+  to.teams[in.teamNum - 1].problems[in.problemNum - 1].solved = true;
+  to.teams[in.teamNum - 1].problems[in.problemNum - 1].timePenalty = in.time_minutes;
+}
+void processIncorrect (struct input in, struct teams to) {
+  to.teams[in.teamNum - 1].problems[in.problemNum - 1].timePenalty += gTimePenalty;
+}
+void processSubmission (struct input in, struct teams to) {
+  switch (in.submission) { 
+    case 'C':
+      processCorrect (in, to);
+      break;
+    case 'I':
+      processIncorrect (in, to);
+      break;
+    case 'R':
+      printf ("Clarification Request\n");
+      break;
+    case 'U':
+      printf ("Unjudged\n");
+      break;
+    case 'E':
+      printf ("Erroneous Submission\n");
+      break;
+    default :
+      printf ("Error: %s\n", strerror(errno));
+    break;
+  }
+}
+
+
+
 void printSubmission (struct input submission) {
   printf ("teamNum = %d\n", submission.teamNum);
   printf ("problemNum = %d\n", submission.problemNum);
@@ -159,6 +199,15 @@ struct teams zeroTeams(void) {
   }
   for (int i = 0; i < gMaxNumTeams; i++) {
     retTeams.teams[i] = zero;
+    retTeams.teams[i].teamID = i + 1;
   }
   return retTeams;
+}
+void printTeam(struct team t) {
+  printf ("teamID = %d\n", t.teamID);
+  for (int i = 0; i < gNumProblems; i++) {
+    printf ("problemNum = %d\n", t.problems[i].num);
+    printf ("solved = %d\n", t.problems[i].solved);
+    printf ("timePenalty = %d\n", t.problems[i].timePenalty);
+  }  
 }
