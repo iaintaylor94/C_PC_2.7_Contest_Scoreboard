@@ -18,12 +18,12 @@ There are between 1 and 100 contestants in the competition, and 9 problems to so
 Only the first two types affect the score of the team.
 
 The score input to the program is formatted as follows:
-contestant number : problem number : time : submission type (L)
+team number : problem number : time : submission type (L)
 
 The input consists of:
 1. The number of cases
 2. A blank line
-3. Several lines of the above form (contestant number : problem number : time : submission type (L))
+3. Several lines of the above form (team number : problem number : time : submission type (L))
 4. A blank line if more cases / No line if last case
 5. Repeat (3 - 4) until all cases have been processed
 

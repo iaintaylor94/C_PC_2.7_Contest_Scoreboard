@@ -8,9 +8,29 @@
 // Declare file handles
 FILE *gInputFile;
 
+// Constants
+const int gMaxLineLength = 81;
+
+// Structures
+struct input {
+  int teamNum;
+  int problemNum;
+  int time_minutes;
+  char submission; // C I R U E
+
+  bool is_valid;
+};
+
 // Declare Functions
 // File Handling
 void usage (char *);
+
+// I/O
+int getNumCases (FILE*);
+void stripBlankLine(FILE*);
+struct input getSubmission(FILE*);
+
+void printSubmission (struct input);
 
 int main(int argc, char *argv[]) {
 
@@ -27,7 +47,20 @@ int main(int argc, char *argv[]) {
   /*-------------------------------FILE INITIALIZATION END--------------------------------*/
   /*--------------------------------MAIN PROGRAM START------------------------------------*/
 
+  // Get input
+  int numCases = getNumCases(gInputFile);
+  printf ("numCases = %d\n", numCases);
+  stripBlankLine(gInputFile);
 
+  for (int i = 0; i < numCases; i++) {
+    struct input submission = getSubmission(gInputFile);
+    while (submission.is_valid) {
+      printSubmission(submission); printf ("\n");
+      submission = getSubmission(gInputFile);
+    }
+  }
+
+  
 
 
 
@@ -45,4 +78,44 @@ int main(int argc, char *argv[]) {
 void usage (char *cmd) {
   fprintf (stderr, "usage: %s inputFileName\n", cmd);
   exit (EXIT_SUCCESS);
+}
+
+// I/O
+int getNumCases (FILE* fp) {
+  int numCases;
+  char line [gMaxLineLength];
+  if (NULL == fgets (line, gMaxLineLength, fp)) {
+    printf ("Error: %s\n", strerror(errno));
+  }
+  else {
+    numCases = atoi (line);
+  }
+  return numCases;
+}
+void stripBlankLine(FILE* fp) {
+  char line [gMaxLineLength];
+  if (NULL == fgets (line, gMaxLineLength, fp)) {
+    printf ("Error: %s\n", strerror(errno));
+  }
+}
+struct input getSubmission(FILE* fp) {
+  struct input retSubmission;
+  char line [gMaxLineLength];
+  if (NULL == fgets (line, gMaxLineLength, fp)) {
+    printf ("Error: %s\n", strerror(errno));
+    retSubmission.is_valid = false;
+  }
+  else {
+    sscanf (line, "%d %d %d %c", &retSubmission.teamNum, &retSubmission.problemNum, &retSubmission.time_minutes, &retSubmission.submission);
+    retSubmission.is_valid = true;
+  }
+  return retSubmission;
+}
+
+void printSubmission (struct input submission) {
+  printf ("teamNum = %d\n", submission.teamNum);
+  printf ("problemNum = %d\n", submission.problemNum);
+  printf ("time_minutes = %d\n", submission.time_minutes);
+  printf ("submission = %c\n", submission.submission);
+  printf ("is_valid = %d\n", submission.is_valid);
 }
