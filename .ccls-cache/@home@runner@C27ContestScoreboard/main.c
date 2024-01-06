@@ -91,7 +91,7 @@ int main(int argc, char *argv[]) {
   for (int i = 0; i < numCases; i++) { 
     struct input submission = getSubmission(gInputFile);
     while (submission.is_valid) {
-      printSubmission(submission); printf ("\n");
+//      printSubmission(submission); printf ("\n");
 
       processSubmission (submission, &teams);
       
@@ -99,7 +99,9 @@ int main(int argc, char *argv[]) {
       submission = getSubmission(gInputFile);
     }
 
-    zeroScoreboard(gScoreboard);
+    debugTeams(teams);
+
+//    zeroScoreboard(gScoreboard);
 //    debugScoreboard(gScoreboard);
 //    debugTeams(teams);
 //    calculateScoreboard(gScoreboard);
@@ -173,23 +175,23 @@ void processSubmission (struct input in, struct teams *to) {
   switch (in.submission) { 
     case 'C':
       processCorrect (in, to);
-      printTeam(to->teams[in.teamNum - 1]);
+      //printTeam(to->teams[in.teamNum - 1]);
       break;
     case 'I':
       processIncorrect (in, to);
-      printTeam(to->teams[in.teamNum - 1]);
+      //printTeam(to->teams[in.teamNum - 1]);
       break;
     case 'R':
-      printf ("Clarification Request\n\n");
+      //printf ("Clarification Request\n\n");
       break;
     case 'U':
-      printf ("Unjudged\n\n");
+      //printf ("Unjudged\n\n");
       break;
     case 'E':
-      printf ("Erroneous Submission\n\n");
+      //printf ("Erroneous Submission\n\n");
       break;
     default :
-      printf ("Error: %s\n\n", strerror(errno));
+      //printf ("Error: %s\n\n", strerror(errno));
     break;
   }
 }
