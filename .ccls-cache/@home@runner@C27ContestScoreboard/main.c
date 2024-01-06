@@ -77,11 +77,10 @@ int main(int argc, char *argv[]) {
 
   // Define teams
   struct teams teams = zeroTeams();
-//  debugTeams(teams);
   
   // Get input
   int numCases = getNumCases(gInputFile);
-  printf ("numCases = %d\n", numCases);
+//  printf ("numCases = %d\n", numCases);
   stripBlankLine(gInputFile);
 
   for (int i = 0; i < numCases; i++) { 
@@ -92,16 +91,10 @@ int main(int argc, char *argv[]) {
     }
 
     sortTeams (&teams);
-//    debugTeams(teams);
-
     printScoreboard (teams);
-
     
     teams = zeroTeams();
   }
-
-  
-
 
 
 
@@ -142,7 +135,7 @@ struct input getSubmission(FILE* fp) {
   struct input retSubmission;
   char line [gMaxLineLength];
   if (NULL == fgets (line, gMaxLineLength, fp)) {
-    printf ("Error: %s\n", strerror(errno));
+//    printf ("Error: %s\n", strerror(errno));
     retSubmission.is_valid = false;
   }
   else {
