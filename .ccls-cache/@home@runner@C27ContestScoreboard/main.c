@@ -280,10 +280,10 @@ int processPenaltyTime(struct team a, struct team b) {
   int penaltyB = penalty (b);
 
   if (penaltyA > penaltyB) {
-    return 1;
+    return -1;
   }
   else if (penaltyA < penaltyB) {
-    return -1;
+    return 1;
   }
   else {
     return 0;
@@ -291,10 +291,10 @@ int processPenaltyTime(struct team a, struct team b) {
 }
 int processTeamID (struct team a, struct team b) {
   if (a.teamID > b.teamID) {
-    return 1;
+    return -1;
   }
   else if (a.teamID < b.teamID) {
-    return -1;
+    return 1;
   }
   else {
     return 0;
@@ -305,24 +305,24 @@ int compareTeams (const void *a, const void *b) {
   struct team *teamB = (struct team *) b;
 
   if (processNumSolved(*teamA, *teamB) == 1) {
-    return 1;
+    return -1;
   }
   else if (processNumSolved(*teamA, *teamB) == -1) {
-    return -1;
+    return 1;
   }
   else {
     if (processPenaltyTime(*teamA, *teamB) == 1) {
-      return 1;
+      return -1;
     }
     else if (processPenaltyTime(*teamA, *teamB) == -1) {
-      return -1;
+      return 1;
     }
     else {
       if (processTeamID(*teamA, *teamB) == 1) {
-        return 1;
+        return -1;
       }
       else if (processTeamID(*teamA, *teamB) == -1) {
-        return -1;
+        return 1;
       }
       else {
         return 0;
