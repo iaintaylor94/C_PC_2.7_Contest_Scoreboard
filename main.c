@@ -31,6 +31,7 @@ struct problem {
 struct team {
   int teamID;
   struct problem problems[gNumProblems];
+  int numSolved;
 };
 struct teams {
   struct team teams[gMaxNumTeams];
@@ -59,6 +60,7 @@ bool isCompeting (struct team);
 void zeroScoreboard(struct teams);
 void calculateScoreboard(struct teams);
 void printScoreboard(struct teams);
+void debugScoreboard(struct teams);
 
 int main(int argc, char *argv[]) {
 
@@ -96,7 +98,8 @@ int main(int argc, char *argv[]) {
     }
 
     zeroScoreboard(gScoreboard);
-//    calculateScoreboard(gScoreboard);
+    debugScoreboard(gScoreboard);
+    calculateScoreboard(gScoreboard);
     printScoreboard(gScoreboard);
     
     teams = zeroTeams();
@@ -158,6 +161,7 @@ struct input getSubmission(FILE* fp) {
 void processCorrect (struct input in, struct teams to) {
   to.teams[in.teamNum - 1].problems[in.problemNum - 1].solved = true;
   to.teams[in.teamNum - 1].problems[in.problemNum - 1].timePenalty = in.time_minutes;
+  to.teams[in.teamNum - 1].numSolved++;
 }
 void processIncorrect (struct input in, struct teams to) {
   to.teams[in.teamNum - 1].problems[in.problemNum - 1].timePenalty += gTimePenalty;
@@ -204,6 +208,7 @@ struct team zeroTeam (int teamID) {
     zero.problems[i].solved = false;
     zero.problems[i].timePenalty = 0;
   }
+  zero.numSolved = 0;
   return zero;
 }
 struct teams zeroTeams(void) {
@@ -221,20 +226,55 @@ void printTeam(struct team t) {
     printf ("solved = %d\n", t.problems[i].solved);
     printf ("timePenalty = %d\n", t.problems[i].timePenalty);
   }  
+  printf ("numSolved = %d\n", t.numSolved);
 }
 
 void zeroScoreboard(struct teams scoreboard) {
-  for (int i = 0; i < gMaxNumTeams; i++) {
-    scoreboard.teams[i] = zeroTeam(i);
-  }
+  scoreboard = zeroTeams();
 }
 bool isCompeting (struct team competing) {
+  if (competing.numSolved > 0) {
+    return (true);
+  }
+  else {
+    return (false);
+  }
+}
+int timePenalty (struct team t) {
+  int ret = 0;
   for (int i = 0; i < gNumProblems; i++) {
-    if (competing.problems[i].solved) {
-      return true;
+    if (t.problems[i].solved) {
+      ret += t.problems[i].timePenalty;
     }
   }
-  return false;
+  return (ret);
+}
+int cmpfunc (const void * a, const void * b) {
+  if ( ((struct team*)a)->numSolved > ((struct team*)b)->numSolved) {
+    return (1);
+  }
+  else if ( ((struct team*)a)->numSolved < ((struct team*)b)->numSolved) {
+    return (-1);
+  }
+  else {
+    if (timePenalty(*((struct team*)a)) > timePenalty(*((struct team*)b))) {
+      return (1);
+    }
+    else if (timePenalty(*((struct team*)a)) < timePenalty(*((struct team*)b))) {
+      return (-1);
+    }
+    else {
+      if ( ((struct team*)a)->teamID < ((struct team*)b)->teamID) {
+        return (1);
+      }
+      else {
+        return (-1);
+      }
+    }
+  }
+}
+void calculateScoreboard (struct teams scoreboard) {
+  qsort(scoreboard.teams, gMaxNumTeams, sizeof(struct team), cmpfunc);
 }
 void printScoreboard(struct teams t) {
   for (int i = 0; i < gMaxNumTeams; i++) {
@@ -243,4 +283,18 @@ void printScoreboard(struct teams t) {
     }
   }
   printf ("\n");
+}
+void debugScoreboard(struct teams t) {
+  for (int i = 0; i < gMaxNumTeams; i++) {
+    printf ("teamID = %d\n", t.teams[i].teamID);
+    printf ("numSolved = %d\n", t.teams[i].numSolved);
+    
+    for (int j = 0; j < gNumProblems; j++) {
+      printf ("problemNum = %d\n", j);
+      printf ("\tsolved = %d\n", t.teams[i].problems[j].solved);
+      printf ("\ttimePenalty = %d\n", t.teams[i].problems[j].timePenalty);
+    }
+    
+    printf ("\n");
+  }
 }
