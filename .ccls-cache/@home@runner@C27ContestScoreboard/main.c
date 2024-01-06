@@ -56,6 +56,7 @@ void printSubmission (struct input);
 struct teams zeroTeams(void);
 void printTeam(struct team);
 void debugTeams(struct teams);
+void sortTeams (struct teams*);
 
 
 int main(int argc, char *argv[]) {
@@ -85,14 +86,11 @@ int main(int argc, char *argv[]) {
   for (int i = 0; i < numCases; i++) { 
     struct input submission = getSubmission(gInputFile);
     while (submission.is_valid) {
-//      printSubmission(submission); printf ("\n");
-
-      processSubmission (submission, &teams);
-      
-      
+      processSubmission (submission, &teams); 
       submission = getSubmission(gInputFile);
     }
 
+    sortTeams (&teams);
     debugTeams(teams);
     
     teams = zeroTeams();
@@ -256,4 +254,82 @@ void debugTeams(struct teams t) {
     }
   }
 }
+int processNumSolved(struct team a, struct team b) {
+  if (a.numSolved > b.numSolved) {
+    return 1;
+  }
+  else if (a.numSolved < b.numSolved) {
+    return -1;
+  }
+  else {
+    return 0;
+  }
+}
+int penalty (struct team t) {
+  int pen = 0;
+  for (int i = 0; i < gNumProblems; i++) {
+    if (t.problems[i].solved == true) {
+      pen += t.problems[i].timePenalty;
+      pen += t.problems[i].timesIncorrect * gTimePenalty;
+    }
+  }
+  return pen;
+}
+int processPenaltyTime(struct team a, struct team b) {
+  int penaltyA = penalty (a);
+  int penaltyB = penalty (b);
 
+  if (penaltyA > penaltyB) {
+    return 1;
+  }
+  else if (penaltyA < penaltyB) {
+    return -1;
+  }
+  else {
+    return 0;
+  }
+}
+int processTeamID (struct team a, struct team b) {
+  if (a.teamID > b.teamID) {
+    return 1;
+  }
+  else if (a.teamID < b.teamID) {
+    return -1;
+  }
+  else {
+    return 0;
+  }
+}
+int compareTeams (const void *a, const void *b) {
+  struct team *teamA = (struct team *) a;
+  struct team *teamB = (struct team *) b;
+
+  if (processNumSolved(*teamA, *teamB) == 1) {
+    return 1;
+  }
+  else if (processNumSolved(*teamA, *teamB) == -1) {
+    return -1;
+  }
+  else {
+    if (processPenaltyTime(*teamA, *teamB) == 1) {
+      return 1;
+    }
+    else if (processPenaltyTime(*teamA, *teamB) == -1) {
+      return -1;
+    }
+    else {
+      if (processTeamID(*teamA, *teamB) == 1) {
+        return 1;
+      }
+      else if (processTeamID(*teamA, *teamB) == -1) {
+        return -1;
+      }
+      else {
+        return 0;
+      }
+    }
+  }
+}
+void sortTeams (struct teams *t) {
+  qsort(t->teams, gMaxNumTeams, sizeof(struct team), compareTeams);
+}
