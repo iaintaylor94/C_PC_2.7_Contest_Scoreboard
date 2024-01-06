@@ -48,8 +48,8 @@ int getNumCases (FILE*);
 void stripBlankLine(FILE*);
 struct input getSubmission(FILE*);
 
+// Submissions
 void processSubmission (struct input, struct teams*);
-
 void printSubmission (struct input);
 
 // Teams
@@ -57,6 +57,7 @@ struct teams zeroTeams(void);
 void printTeam(struct team);
 void debugTeams(struct teams);
 void sortTeams (struct teams*);
+void printScoreboard (struct teams);
 
 
 int main(int argc, char *argv[]) {
@@ -91,7 +92,10 @@ int main(int argc, char *argv[]) {
     }
 
     sortTeams (&teams);
-    debugTeams(teams);
+//    debugTeams(teams);
+
+    printScoreboard (teams);
+
     
     teams = zeroTeams();
   }
@@ -332,4 +336,11 @@ int compareTeams (const void *a, const void *b) {
 }
 void sortTeams (struct teams *t) {
   qsort(t->teams, gMaxNumTeams, sizeof(struct team), compareTeams);
+}
+void printScoreboard (struct teams t) {
+  for (int i = 0;  i < gMaxNumTeams; i++) {
+    if (t.teams[i].numSolved > 0) {
+      printf ("%3d %3d %3d\n", t.teams[i].teamID, t.teams[i].numSolved, penalty(t.teams[i]));
+    }
+  }
 }
