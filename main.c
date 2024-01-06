@@ -27,6 +27,7 @@ struct problem {
   int num;
   bool solved;
   int timePenalty;
+  int timesIncorrect;
 };
 struct team {
   int teamID;
@@ -47,13 +48,14 @@ int getNumCases (FILE*);
 void stripBlankLine(FILE*);
 struct input getSubmission(FILE*);
 
-void processSubmission (struct input, struct teams);
+void processSubmission (struct input, struct teams*);
 
 void printSubmission (struct input);
 
 // Teams
 struct teams zeroTeams(void);
 void printTeam(struct team);
+void debugTeams(struct teams);
 
 // Scoreboard
 bool isCompeting (struct team);
@@ -79,7 +81,7 @@ int main(int argc, char *argv[]) {
 
   // Define teams
   struct teams teams = zeroTeams();
-
+//  debugTeams(teams);
   
   // Get input
   int numCases = getNumCases(gInputFile);
@@ -89,18 +91,19 @@ int main(int argc, char *argv[]) {
   for (int i = 0; i < numCases; i++) { 
     struct input submission = getSubmission(gInputFile);
     while (submission.is_valid) {
-//      printSubmission(submission); printf ("\n");
+      printSubmission(submission); printf ("\n");
 
-      processSubmission (submission, teams);
-//      printTeam (teams.teams[submission.teamNum - 1]); // ??? working ??? - test via output
-
+      processSubmission (submission, &teams);
+      
+      
       submission = getSubmission(gInputFile);
     }
 
     zeroScoreboard(gScoreboard);
-    debugScoreboard(gScoreboard);
-    calculateScoreboard(gScoreboard);
-    printScoreboard(gScoreboard);
+//    debugScoreboard(gScoreboard);
+//    debugTeams(teams);
+//    calculateScoreboard(gScoreboard);
+//    printScoreboard(gScoreboard);
     
     teams = zeroTeams();
   }
@@ -158,33 +161,35 @@ struct input getSubmission(FILE* fp) {
 }
 
 
-void processCorrect (struct input in, struct teams to) {
-  to.teams[in.teamNum - 1].problems[in.problemNum - 1].solved = true;
-  to.teams[in.teamNum - 1].problems[in.problemNum - 1].timePenalty = in.time_minutes;
-  to.teams[in.teamNum - 1].numSolved++;
+void processCorrect (struct input in, struct teams *to) {
+  to->teams[in.teamNum - 1].problems[in.problemNum - 1].solved = true;
+  to->teams[in.teamNum - 1].problems[in.problemNum - 1].timePenalty = in.time_minutes;
+  to->teams[in.teamNum - 1].numSolved++;
 }
-void processIncorrect (struct input in, struct teams to) {
-  to.teams[in.teamNum - 1].problems[in.problemNum - 1].timePenalty += gTimePenalty;
+void processIncorrect (struct input in, struct teams *to) {
+  to->teams[in.teamNum - 1].problems[in.problemNum - 1].timesIncorrect++;
 }
-void processSubmission (struct input in, struct teams to) {
+void processSubmission (struct input in, struct teams *to) {
   switch (in.submission) { 
     case 'C':
       processCorrect (in, to);
+      printTeam(to->teams[in.teamNum - 1]);
       break;
     case 'I':
       processIncorrect (in, to);
+      printTeam(to->teams[in.teamNum - 1]);
       break;
     case 'R':
-      printf ("Clarification Request\n");
+      printf ("Clarification Request\n\n");
       break;
     case 'U':
-      printf ("Unjudged\n");
+      printf ("Unjudged\n\n");
       break;
     case 'E':
-      printf ("Erroneous Submission\n");
+      printf ("Erroneous Submission\n\n");
       break;
     default :
-      printf ("Error: %s\n", strerror(errno));
+      printf ("Error: %s\n\n", strerror(errno));
     break;
   }
 }
@@ -203,12 +208,13 @@ void printSubmission (struct input submission) {
 struct team zeroTeam (int teamID) {
   struct team zero;
   zero.teamID = teamID;
+  zero.numSolved = 0;
   for (int i = 0; i < gNumProblems; i++) {
-    zero.problems[i].num = 0;
+    zero.problems[i].num = i;
     zero.problems[i].solved = false;
     zero.problems[i].timePenalty = 0;
+    zero.problems[i].timesIncorrect = 0;
   }
-  zero.numSolved = 0;
   return zero;
 }
 struct teams zeroTeams(void) {
@@ -222,11 +228,43 @@ struct teams zeroTeams(void) {
 void printTeam(struct team t) {
   printf ("teamID = %d\n", t.teamID);
   for (int i = 0; i < gNumProblems; i++) {
-    printf ("problemNum = %d\n", t.problems[i].num);
-    printf ("solved = %d\n", t.problems[i].solved);
-    printf ("timePenalty = %d\n", t.problems[i].timePenalty);
+    printf ("\tproblemNum = %d\n", t.problems[i].num);
+    if (t.problems[i].solved == true) {
+      printf ("\t\tsolved = true\n");
+    }
+    else {
+      printf ("\t\tsolved = false\n");
+    }
+    printf ("\t\ttimesIncorrect = %d\n", t.problems[i].timesIncorrect);
+    printf ("\t\ttimePenalty = %d\n", t.problems[i].timePenalty);
   }  
-  printf ("numSolved = %d\n", t.numSolved);
+  printf ("\t\tnumSolved = %d\n\n", t.numSolved);
+}
+void debugTeams(struct teams t) {
+  for (int i = 0; i < gMaxNumTeams; i++) {
+    if (t.teams[i].numSolved > 0) {
+      printf ("teamID = %3d\tCOMPETING\n", t.teams[i].teamID);
+      printf ("numSolved = %d\n", t.teams[i].numSolved);
+
+      for (int j = 0; j < gNumProblems; j++) {
+        printf ("problemNum = %d\n", j);
+        if (t.teams[i].problems[j].solved == true) {
+          printf ("\tsolved = true\n");
+          printf ("\ttimePenalty = %d\n", t.teams[i].problems[j].timePenalty);
+          printf ("\ttimesIncorrect = %d\n", t.teams[i].problems[j].timesIncorrect);
+        }
+        else {
+          printf ("\tsolved = false\n");
+        }
+      }
+
+      printf ("\n");
+    }
+    else {
+      printf ("teamID = %3d\tNOT COMPETING\n", t.teams[i].teamID);
+      printf ("numSolved = %d\n\n", t.teams[i].numSolved);
+    }
+  }
 }
 
 void zeroScoreboard(struct teams scoreboard) {
@@ -291,8 +329,12 @@ void debugScoreboard(struct teams t) {
     
     for (int j = 0; j < gNumProblems; j++) {
       printf ("problemNum = %d\n", j);
-      printf ("\tsolved = %d\n", t.teams[i].problems[j].solved);
-      printf ("\ttimePenalty = %d\n", t.teams[i].problems[j].timePenalty);
+      if (t.teams[i].problems[j].solved == true) {
+        printf ("\tsolved = true\n");
+      }
+      else {
+        printf ("\tsolved = false\n");
+      }
     }
     
     printf ("\n");
