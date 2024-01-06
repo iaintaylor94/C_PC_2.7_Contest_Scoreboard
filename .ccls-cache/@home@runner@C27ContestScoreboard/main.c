@@ -57,12 +57,6 @@ struct teams zeroTeams(void);
 void printTeam(struct team);
 void debugTeams(struct teams);
 
-// Scoreboard
-bool isCompeting (struct team);
-void zeroScoreboard(struct teams);
-void calculateScoreboard(struct teams);
-void printScoreboard(struct teams);
-void debugScoreboard(struct teams);
 
 int main(int argc, char *argv[]) {
 
@@ -100,12 +94,6 @@ int main(int argc, char *argv[]) {
     }
 
     debugTeams(teams);
-
-//    zeroScoreboard(gScoreboard);
-//    debugScoreboard(gScoreboard);
-//    debugTeams(teams);
-//    calculateScoreboard(gScoreboard);
-//    printScoreboard(gScoreboard);
     
     teams = zeroTeams();
   }
@@ -269,76 +257,3 @@ void debugTeams(struct teams t) {
   }
 }
 
-void zeroScoreboard(struct teams scoreboard) {
-  scoreboard = zeroTeams();
-}
-bool isCompeting (struct team competing) {
-  if (competing.numSolved > 0) {
-    return (true);
-  }
-  else {
-    return (false);
-  }
-}
-int timePenalty (struct team t) {
-  int ret = 0;
-  for (int i = 0; i < gNumProblems; i++) {
-    if (t.problems[i].solved) {
-      ret += t.problems[i].timePenalty;
-    }
-  }
-  return (ret);
-}
-int cmpfunc (const void * a, const void * b) {
-  if ( ((struct team*)a)->numSolved > ((struct team*)b)->numSolved) {
-    return (1);
-  }
-  else if ( ((struct team*)a)->numSolved < ((struct team*)b)->numSolved) {
-    return (-1);
-  }
-  else {
-    if (timePenalty(*((struct team*)a)) > timePenalty(*((struct team*)b))) {
-      return (1);
-    }
-    else if (timePenalty(*((struct team*)a)) < timePenalty(*((struct team*)b))) {
-      return (-1);
-    }
-    else {
-      if ( ((struct team*)a)->teamID < ((struct team*)b)->teamID) {
-        return (1);
-      }
-      else {
-        return (-1);
-      }
-    }
-  }
-}
-void calculateScoreboard (struct teams scoreboard) {
-  qsort(scoreboard.teams, gMaxNumTeams, sizeof(struct team), cmpfunc);
-}
-void printScoreboard(struct teams t) {
-  for (int i = 0; i < gMaxNumTeams; i++) {
-    if (isCompeting(t.teams[i])) {
-    printTeam(t.teams[i]);
-    }
-  }
-  printf ("\n");
-}
-void debugScoreboard(struct teams t) {
-  for (int i = 0; i < gMaxNumTeams; i++) {
-    printf ("teamID = %d\n", t.teams[i].teamID);
-    printf ("numSolved = %d\n", t.teams[i].numSolved);
-    
-    for (int j = 0; j < gNumProblems; j++) {
-      printf ("problemNum = %d\n", j);
-      if (t.teams[i].problems[j].solved == true) {
-        printf ("\tsolved = true\n");
-      }
-      else {
-        printf ("\tsolved = false\n");
-      }
-    }
-    
-    printf ("\n");
-  }
-}
